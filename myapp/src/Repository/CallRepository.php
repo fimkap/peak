@@ -47,4 +47,17 @@ class CallRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function getCallStats(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = '
+            SELECT DISTINCT `customer_id`, count(*) as `total_calls`, sum(`duration`) as `duration` from `call` group by `customer_id`;
+        ';
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $stmt->fetchAll();
+    }
 }
