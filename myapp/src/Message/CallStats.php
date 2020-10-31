@@ -9,11 +9,14 @@ use Symfony\Component\Mercure\Publisher;
 
 include_once __DIR__.'/../PhoneCountries.php';
 
+const MERCURE_JWT_TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.Oo0yg7y4yMa1vr_bziltxuTCqb8JVHKxp-f_FwwOim0';
+const IP_STACK_ACCESS_KEY='ed09e98ccc0c3f163c4d575a764f3629';
+
 final class MyJwtProvider
 {
     public function __invoke(): string
     {
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.Oo0yg7y4yMa1vr_bziltxuTCqb8JVHKxp-f_FwwOim0';
+        return MERCURE_JWT_TOKEN;
     }
 }
 
@@ -52,7 +55,10 @@ class CallStats
             // $this->cache->delete($customer_ip);
             $ip_code_cache = $this->cache->getItem($customer_ip);
             if (!$ip_code_cache->isHit()) {
-                $response = $this->client->request('GET', 'http://api.ipstack.com/'.$customer_ip.'?access_key=ed09e98ccc0c3f163c4d575a764f3629');
+                $response = $this->client->request(
+                    'GET',
+                    'http://api.ipstack.com/'.$customer_ip.'?access_key='.IP_STACK_ACCESS_KEY
+                );
                 $json_data = json_decode($response->getContent(), true);
                 $ip_code = $json_data['continent_code'];
                 $ip_code_cache->expiresAfter(3600);
@@ -63,7 +69,8 @@ class CallStats
 
             $customer_id = $call->getCustomerId();
             $duration = $call->getDuration();
-            $stats = $call_stats[$customer_id] ?? array('same_calls' => 0, 'same_duration' => 0, 'total_calls' => 0, 'total_duration' => 0);
+            $stats = $call_stats[$customer_id] ??
+                array('same_calls' => 0, 'same_duration' => 0, 'total_calls' => 0, 'total_duration' => 0);
             $stats['total_calls'] += 1;
             $stats['total_duration'] += $duration;
             if ($phone_code == $ip_code) {
