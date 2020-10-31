@@ -7,7 +7,7 @@ function App() {
   const [callsData, setCallsData] = useState({})
 
   useEffect(() => {
-    const eventSource = new EventSource('http://mercure:3000/.well-known/mercure?topic=' + encodeURIComponent('http://commpeak.com/calls/1'));
+    const eventSource = new EventSource('http://localhost:3000/.well-known/mercure?topic=' + encodeURIComponent('http://commpeak.com/calls/1'));
     eventSource.onmessage = event => {
       // Will be called every time an update is published by the server
       // alert("Data from mercure");

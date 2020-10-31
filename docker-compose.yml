@@ -27,9 +27,6 @@ services:
       - target: 3001
         published: 3001
         protocol: tcp
-      - target: 80
-        published: 80
-        protocol: tcp
   mercure:
     build:
       context: ./mercure

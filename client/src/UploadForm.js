@@ -14,15 +14,15 @@ const UploadForm = () => {
       // const response = await axios.post('http://localhost:8000/calls', formData);
       const response = await axios({
         method: 'post',
-        url: 'http://myapp:8000/calls',
+        url: 'http://localhost:8000/calls',
         data: formData,
         headers: {
           'content-type': `multipart/form-data; boundary=${formData._boundary}`,
         },
       });
-      alert("File Upload success" + response.data);
+      console.log("File Upload success" + response.data);
     } catch(err) {
-      alert("File Upload Error: " + err.request);
+      console.log("File Upload Error: " + err.request);
     }
   };
 
