@@ -3,42 +3,27 @@ namespace App\Controller;
 
 use App\Entity\Call;
 use App\Repository\CallRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Message\CallStats;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Mercure\PublisherInterface;
-use Symfony\Component\Mercure\Update;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Contracts\Cache\ItemInterface;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use DateTime;
 
-include_once __DIR__.'/../PhoneCountries.php';
-// require_once(MAX_PREFIX_LENGTH.__DIR__.'/../PhoneCountries.php');
+// include_once __DIR__.'/../PhoneCountries.php';
 
 class CallsController extends AbstractController
 {
     private $client;
-    private $cache;
 
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->cache = new FilesystemAdapter();
     }
 
-    public function number(): Response
-    {
-        $number = random_int(0, 100);
-
-        return new Response(
-            '<html><body>Lucky number: '.$number.'</body></html>'
-        );
-    }
-
-    public function calls(Request $request, CallRepository $callRepository, PublisherInterface $publisher, LoggerInterface $logger): Response
+    public function calls(Request $request, CallRepository $callRepository, PublisherInterface $publisher, MessageBusInterface $bus): Response
     {
         if ($request->isMethod('POST'))
         {
@@ -60,6 +45,9 @@ class CallsController extends AbstractController
                 $entityManager->flush();
                 fclose($handle);
             }
+
+            $bus->dispatch(new CallStats($callRepository, $this->client));
+
             return new Response(
                 '<html><body>Num of rows: '.$row.'</body></html>'
             );
@@ -69,59 +57,5 @@ class CallsController extends AbstractController
         // (select distinct customer_id, count(*) as total_calls, sum(duration) as duration from bitnami_myapp.call group by customer_id) as total
         // full outer join
         // (select distinct customer_id, count(*) as total_calls_same, sum(duration) as duration_same from bitnami_myapp.call where customer_ip = dialed_number group by customer_id) as total_same on total.customer_id = total_same.customer_id
-        if ($request->isMethod('GET'))
-        {
-            // $calls = $callRepository->getCallStats();
-            $call_stats = array();
-            $calls = $callRepository->findAll();
-            foreach ($calls as $call) {
-                // Convert phone to a continent code
-                $phone = $call->getDialedNumber();
-                $phone_code = $phone;
-                for ($i = 1; $i < MAX_PREFIX_LENGTH+1; $i++) {
-                    $phone_key = substr($phone, 0, $i);
-                    if (array_key_exists($phone_key, PHONE_COUNTRIES)) {
-                        $phone_code = COUNTRY_CONTINENTS[PHONE_COUNTRIES[$phone_key]];
-                        break;
-                    } 
-                }
-
-                $logger->info('phone code: '.$phone_code);
-
-                // Convert customer IP to a continent code
-                $customer_ip = $call->getCustomerIp();
-                $ip_code = $this->cache->get($customer_ip, function (ItemInterface $item, $customer_ip) {
-                    $item->expiresAfter(24);
-                    $response = $this->client->request('GET', 'http://api.ipstack.com/'.$customer_ip.'?access_key=ed09e98ccc0c3f163c4d575a764f3629');
-                    $json_data = json_decode($response->getContent(), true);
-                    $computedValue = $json_data['continent_code'];
-                    return $computedValue;
-                });
-                $logger->info('ip code: '.$ip_code);
-
-                $customer_id = $call->getCustomerId();
-                $duration = $call->getDuration();
-                $stats = $call_stats[$customer_id] ?? array('same_calls' => 0, 'same_duration' => 0, 'total_calls' => 0, 'total_duration' => 0);
-                $stats['total_calls'] += 1;
-                $stats['total_duration'] += $duration;
-                if ($phone_code == $ip_code) {
-                    $stats['same_calls'] += 1;
-                    $stats['same_duration'] += $duration;
-                }
-                $call_stats[$customer_id] = $stats;
-            }
-
-            $update = new Update(
-                'http://commpeak.com/calls/1',
-                json_encode($call_stats)
-            );
-
-            // The Publisher service is an invokable object
-            $publisher($update);
-
-            return new Response(
-                '<html><body>The 6434 calls: '.$call_stats['6434']['total_calls'].'</body></html>'
-            );
-        }
     }
 }

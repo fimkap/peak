@@ -7,6 +7,8 @@ services:
       - '8000:8000'
     volumes:
       - '.:/app'
+    environment:
+      - MARIADB_DATABASE=bitnami_myapp
     depends_on:
       - mariadb
   mariadb:
