@@ -80,7 +80,7 @@ class CallStats
             $call_stats[$customer_id] = $stats;
         }
 
-        $publisher = new Publisher('http://192.168.1.150:3000/.well-known/mercure', new MyJwtProvider());
+        $publisher = new Publisher('http://mercure:3000/.well-known/mercure', new MyJwtProvider());
         $update = new Update(
             'http://commpeak.com/calls/1',
             json_encode($call_stats)

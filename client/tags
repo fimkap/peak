@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+App	src/App.js	/^function App() {$/;"	F
+UploadForm	src/UploadForm.js	/^const UploadForm = () => {$/;"	F
+callsData	src/App.js	/^  const [callsData, setCallsData] = useState({})$/;"	V
+data	src/UploadForm.js	/^        data: formData,$/;"	P
+eventSource	src/App.js	/^    const eventSource = new EventSource('http:\/\/mercure:3000\/.well-known\/mercure?topic=' + encodeURIComponent('http:\/\/commpeak.com\/calls\/1'));$/;"	V
+formData	src/UploadForm.js	/^    const formData = new FormData();$/;"	V
+headers	src/UploadForm.js	/^        headers: {$/;"	P
+listItems	src/App.js	/^  const listItems = Object.keys(callsData).map((call) =>$/;"	F
+name	src/UploadForm.js	/^  const [name, setName] = useState("");$/;"	V
+reportWebVitals	src/reportWebVitals.js	/^const reportWebVitals = onPerfEntry => {$/;"	F
+selectedFile	src/UploadForm.js	/^  const [selectedFile, setSelectedFile] = useState(null);$/;"	V
+setCallsData	src/App.js	/^  const [callsData, setCallsData] = useState({})$/;"	V
+setName	src/UploadForm.js	/^  const [name, setName] = useState("");$/;"	V
+setSelectedFile	src/UploadForm.js	/^  const [selectedFile, setSelectedFile] = useState(null);$/;"	V
+submitForm	src/UploadForm.js	/^  const submitForm = async () => {$/;"	F
