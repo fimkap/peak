@@ -10,8 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use DateTime;
+use Psr\Log\LoggerInterface;
 
-const FILE_FORM_KEY = 'callsfile';
+const FILE_FORM_KEY = 'file';
 
 class CallsController extends AbstractController
 {
@@ -22,7 +23,7 @@ class CallsController extends AbstractController
         $this->client = $client;
     }
 
-    public function calls(Request $request, CallRepository $callRepository, MessageBusInterface $bus): Response
+    public function calls(Request $request, CallRepository $callRepository, MessageBusInterface $bus, LoggerInterface $logger): Response
     {
         if ($request->isMethod('POST'))
         {
@@ -30,6 +31,9 @@ class CallsController extends AbstractController
                 $entityManager = $this->getDoctrine()->getManager();
 
                 $file = $request->files->get(FILE_FORM_KEY);
+                // $dump = print_r($request, TRUE);
+                // $logger->info('request: '.$dump);
+                // $logger->info('file uploaded: '.$file);
                 $rows = 0;
                 if (($handle = fopen($file, "r")) !== FALSE) {
                     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
